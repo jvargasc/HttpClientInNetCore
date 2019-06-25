@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Movies.API.Contexts;
 using Movies.API.Services;
 using Swashbuckle.AspNetCore.Swagger;
+using System;
 
 namespace Movies.API
 {
@@ -56,7 +57,8 @@ namespace Movies.API
             // appSettings (note: use this during development; in a production environment,
             // it's better to store the connection string in an environment variable)
             var connectionString = Configuration["ConnectionStrings:MoviesDBConnectionString"];
-            services.AddDbContext<MoviesContext>(o => o.UseSqlServer(connectionString));
+			connectionString = connectionString + "AttachDbFilename=" + Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\MoviesDB.mdf;";
+			services.AddDbContext<MoviesContext>(o => o.UseSqlServer(connectionString));
 
             services.AddScoped<IMoviesRepository, MoviesRepository>();
             services.AddScoped<IPostersRepository, PostersRepository>();
