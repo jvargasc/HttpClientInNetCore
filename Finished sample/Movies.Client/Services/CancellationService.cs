@@ -1,4 +1,5 @@
 ﻿using Marvin.StreamExtensions;
+using Microsoft.Extensions.Configuration;
 using Movies.Client.Models;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,9 @@ namespace Movies.Client.Services
 {
     public class CancellationService : IIntegrationService
     {
-        private static HttpClient _httpClient = new HttpClient(
+		private IConfiguration Configuration { get; }
+
+		private static HttpClient _httpClient = new HttpClient(
           new HttpClientHandler()
           {
               AutomaticDecompression = System.Net.DecompressionMethods.GZip
@@ -20,11 +23,14 @@ namespace Movies.Client.Services
         private CancellationTokenSource _cancellationTokenSource = 
             new CancellationTokenSource();
 
-        public CancellationService()
+        public CancellationService(IConfiguration configuration)
         {
-            // set up HttpClient instance
-            _httpClient.BaseAddress = new Uri("http://localhost:57863");
-            _httpClient.Timeout = new TimeSpan(0, 0, 5);
+			Configuration = configuration;
+
+			// set up HttpClient instance
+			//_httpClient.BaseAddress = new Uri("http://localhost:57863");
+			_httpClient.BaseAddress = new Uri(Configuration["UrlList:Url02"]); 
+			_httpClient.Timeout = new TimeSpan(0, 0, 5);
             _httpClient.DefaultRequestHeaders.Clear();
         }
 

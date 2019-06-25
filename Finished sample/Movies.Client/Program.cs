@@ -1,21 +1,38 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Movies.Client.Services;
 using System;
+using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
+
+/*
+This packages must be added:
+dotnet add package Microsoft.Extensions.Configuration
+dotnet add package Microsoft.Extensions.Configuration.FileExtensions
+dotnet add package Microsoft.Extensions.Configuration.Json 
+and finally execute: dotnet restore
+ */
 
 namespace Movies.Client
 {
     class Program
     {
- 
-        static async Task Main(string[] args)
+		private IConfiguration Configuration { get; }
+
+		[STAThread]
+		static async Task Main(string[] args)
         {
             // create a new ServiceCollection 
             var serviceCollection = new ServiceCollection();
 
-            ConfigureServices(serviceCollection);
+			IConfiguration Configuration = new ConfigurationBuilder()
+				.SetBasePath(Directory.GetCurrentDirectory())
+				.AddJsonFile("appsettings.json", true, true)
+				.Build();
+
+			ConfigureServices(serviceCollection, Configuration);
 
             // create a new ServiceProvider
             var serviceProvider = serviceCollection.BuildServiceProvider();
@@ -37,23 +54,27 @@ namespace Movies.Client
                 logger.LogError(generalException, 
                     "An exception happened while running the integration service.");
             }
-            
-            Console.ReadKey();
+			Console.Write("Press any key to exit...");
+			Console.ReadKey();
+			Environment.Exit(0);
         }
 
-        private static void ConfigureServices(IServiceCollection serviceCollection)
+        private static void ConfigureServices(IServiceCollection serviceCollection, IConfiguration configuration)
         {
-            // add loggers           
-            serviceCollection.AddSingleton(new LoggerFactory()
+			IConfiguration Configuration = configuration;
+
+			// add loggers           
+			serviceCollection.AddSingleton(new LoggerFactory()
                   .AddConsole()
                   .AddDebug());
 
             serviceCollection.AddLogging();
 
-            serviceCollection.AddHttpClient("MoviesClient", client =>
+			serviceCollection.AddHttpClient("MoviesClient", client =>
             {
-                client.BaseAddress = new Uri("http://localhost:57863");
-                client.Timeout = new TimeSpan(0, 0, 30);
+				//client.BaseAddress = new Uri("http://localhost:57863");
+				client.BaseAddress = new Uri(Configuration["UrlList:Url02"]);
+				client.Timeout = new TimeSpan(0, 0, 30);
                 client.DefaultRequestHeaders.Clear();
             })
             .AddHttpMessageHandler(handler => new TimeOutDelegatingHandler(TimeSpan.FromSeconds(20)))
@@ -107,6 +128,7 @@ namespace Movies.Client
 
             // For the custom http handlers demos
             serviceCollection.AddScoped<IIntegrationService, HttpHandlersService>();     
-        }
-    }
+		}
+	}
+
 }

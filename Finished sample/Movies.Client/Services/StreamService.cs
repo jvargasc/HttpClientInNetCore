@@ -9,6 +9,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Marvin.StreamExtensions;
+using Microsoft.Extensions.Configuration;
 
 namespace Movies.Client.Services
 {
@@ -20,11 +21,15 @@ namespace Movies.Client.Services
             new HttpClientHandler() {
                 AutomaticDecompression = System.Net.DecompressionMethods.GZip });
 
-        public StreamService()
+		private IConfiguration Configuration { get; }
+
+		public StreamService(IConfiguration configuration)
         {
-            // set up HttpClient instance
-            _httpClient.BaseAddress = new Uri("http://localhost:57863");
-            _httpClient.Timeout = new TimeSpan(0, 0, 30);
+			Configuration = configuration;
+			// set up HttpClient instance
+			//_httpClient.BaseAddress = new Uri("http://localhost:57863");
+			_httpClient.BaseAddress = new Uri(Configuration["UrlList:Url02"]);
+			_httpClient.Timeout = new TimeSpan(0, 0, 30);
             _httpClient.DefaultRequestHeaders.Clear();
         }
 

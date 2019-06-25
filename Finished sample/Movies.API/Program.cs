@@ -19,9 +19,9 @@ namespace Movies.API
         {
             var host = CreateWebHostBuilder(args).Build();
 
-            // For demo purposes: clear the database 
-            // and refill it with dummy data  
-            using (var scope = host.Services.CreateScope())
+			// For demo purposes: clear the database 
+			// and refill it with dummy data  
+			using (var scope = host.Services.CreateScope())
             {
                 try
                 {

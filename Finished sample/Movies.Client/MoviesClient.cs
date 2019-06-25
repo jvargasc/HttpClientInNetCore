@@ -1,4 +1,5 @@
 ﻿using Marvin.StreamExtensions;
+using Microsoft.Extensions.Configuration;
 using Movies.Client.Models;
 using System;
 using System.Collections.Generic;
@@ -13,12 +14,16 @@ namespace Movies.Client
     public class MoviesClient
     {
         private HttpClient _client;
+		private IConfiguration Configuration { get; }
 
-        public MoviesClient(HttpClient client)
+		public MoviesClient(HttpClient client, IConfiguration configuration)
         {
-            _client = client;
-            _client.BaseAddress = new Uri("http://localhost:57863");
-            _client.Timeout = new TimeSpan(0, 0, 30);
+			Configuration = configuration;
+
+			_client = client;
+			//_client.BaseAddress = new Uri("http://localhost:57863");
+			_client.BaseAddress = new Uri(Configuration["UrlList:Url02"]);
+			_client.Timeout = new TimeSpan(0, 0, 30);
             _client.DefaultRequestHeaders.Clear();
         }
 

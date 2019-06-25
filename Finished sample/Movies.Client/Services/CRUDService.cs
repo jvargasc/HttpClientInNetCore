@@ -1,4 +1,5 @@
-﻿using Movies.Client.Models;
+﻿using Microsoft.Extensions.Configuration;
+using Movies.Client.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -14,12 +15,16 @@ namespace Movies.Client.Services
     public class CRUDService : IIntegrationService
     {
         private static HttpClient _httpClient = new HttpClient();
+		private IConfiguration Configuration { get; }
 
-        public CRUDService()
+		public CRUDService(IConfiguration configuration)
         {
-            // set up HttpClient instance
-            _httpClient.BaseAddress = new Uri("http://localhost:57863");
-            _httpClient.Timeout = new TimeSpan(0, 0, 30);
+			Configuration = configuration;
+
+			// set up HttpClient instance
+			//_httpClient.BaseAddress = new Uri("http://localhost:57863");
+			_httpClient.BaseAddress = new Uri(Configuration["UrlList:Url02"]);
+			_httpClient.Timeout = new TimeSpan(0, 0, 30);
             _httpClient.DefaultRequestHeaders.Clear();
             //_httpClient.DefaultRequestHeaders.Accept.Add(
             //    new MediaTypeWithQualityHeaderValue("application/json"));

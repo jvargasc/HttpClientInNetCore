@@ -1,4 +1,5 @@
 ﻿using Marvin.StreamExtensions;
+using Microsoft.Extensions.Configuration;
 using Movies.Client.Models;
 using System;
 using System.Collections.Generic;
@@ -18,12 +19,16 @@ namespace Movies.Client.Services
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly MoviesClient _moviesClient;
 
-        public HttpClientFactoryInstanceManagementService(IHttpClientFactory httpClientFactory,
-            MoviesClient moviesClient)
+		private IConfiguration Configuration { get; }
+
+		public HttpClientFactoryInstanceManagementService(IHttpClientFactory httpClientFactory,
+            MoviesClient moviesClient, IConfiguration configuration)
         {
             _httpClientFactory = httpClientFactory;
             _moviesClient = moviesClient;
-        }
+
+			Configuration = configuration;
+	}
 
         public async Task Run()
         {
@@ -86,10 +91,14 @@ namespace Movies.Client.Services
         {
             var httpClient = _httpClientFactory.CreateClient();
 
-            var request = new HttpRequestMessage(
-                HttpMethod.Get,
-                "http://localhost:57863/api/movies");
-            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+			//var request = new HttpRequestMessage(
+			//    HttpMethod.Get,
+			//    "http://localhost:57863/api/movies");
+
+			var request = new HttpRequestMessage(
+				HttpMethod.Get,
+				 Configuration["UrlList:Url02"].ToString() + "/api/movies");
+			request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             using (var response = await httpClient.SendAsync(request,
                 HttpCompletionOption.ResponseHeadersRead,
