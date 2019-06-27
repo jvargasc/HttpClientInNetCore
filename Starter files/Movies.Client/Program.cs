@@ -1,21 +1,27 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Movies.Client.Services;
 using System;
-using System.Net.Http;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace Movies.Client
 {
-    class Program
+	class Program
     {
- 
-        static async Task Main(string[] args)
+		[STAThread]
+		static async Task Main(string[] args)
         {
             // create a new ServiceCollection 
             var serviceCollection = new ServiceCollection();
 
-            ConfigureServices(serviceCollection);
+			IConfiguration Configuration = new ConfigurationBuilder()
+				.SetBasePath(Directory.GetCurrentDirectory())
+				.AddJsonFile("appsettings.json", true, true)
+				.Build();
+
+			ConfigureServices(serviceCollection, Configuration);
 
             // create a new ServiceProvider
             var serviceProvider = serviceCollection.BuildServiceProvider();
@@ -41,20 +47,23 @@ namespace Movies.Client
             Console.ReadKey();
         }
 
-        private static void ConfigureServices(IServiceCollection serviceCollection)
+        private static void ConfigureServices(IServiceCollection serviceCollection, IConfiguration Configuration)
         {
-            // add loggers           
-            serviceCollection.AddSingleton(new LoggerFactory()
+			// add loggers           
+			serviceCollection.AddSingleton(new LoggerFactory()
                   .AddConsole()
                   .AddDebug());
 
             serviceCollection.AddLogging();
 
-            // register the integration service on our container with a 
-            // scoped lifetime
+			//ConfigureServices(serviceCollection, Configuration);
+			serviceCollection.AddSingleton(provider => Configuration);
 
-            // For the CRUD demos
-            serviceCollection.AddScoped<IIntegrationService, CRUDService>();
+			// register the integration service on our container with a 
+			// scoped lifetime
+
+			// For the CRUD demos
+			serviceCollection.AddScoped<IIntegrationService, CRUDService>();
 
             // For the partial update demos
             // serviceCollection.AddScoped<IIntegrationService, PartialUpdateService>();
