@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 15.0.27428.2027
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Movies.Client", "Movies.Client\Movies.Client.csproj", "{C0FA8F85-2A8D-45A4-905C-6665B21E4E91}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8614CB18-9723-4EC7-8D41-D34BDECAD0ED} = {8614CB18-9723-4EC7-8D41-D34BDECAD0ED}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Movies.API", "Movies.API\Movies.API.csproj", "{8614CB18-9723-4EC7-8D41-D34BDECAD0ED}"
 EndProject
