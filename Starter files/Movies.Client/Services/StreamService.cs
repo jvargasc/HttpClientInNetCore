@@ -31,7 +31,6 @@ namespace Movies.Client.Services
 
 		public async Task Run()
         {
-
 			await TestGetPosterWithoutStream();
 			await TestGetPosterWithStream();
 			await TestGetPosterWithStreamAndCompletionMode();
