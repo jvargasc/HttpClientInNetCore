@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Movies.Client.Services;
 using System;
 using System.IO;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Movies.Client
@@ -56,6 +57,37 @@ namespace Movies.Client
 
             serviceCollection.AddLogging();
 
+			//serviceCollection.AddHttpClient("MoviesClient", client =>
+			//{
+			//	client.BaseAddress = new Uri(Configuration["UrlList:Url02"]);
+			//	client.Timeout = new TimeSpan(0, 0, 30);
+			//	client.DefaultRequestHeaders.Clear();
+			//})
+			//.ConfigurePrimaryHttpMessageHandler(handler => 
+			//	new HttpClientHandler()
+			//{
+			//	AutomaticDecompression = System.Net.DecompressionMethods.GZip
+			//});
+
+			//serviceCollection.AddHttpClient<MoviesClient>(client =>
+			//{
+			//	client.BaseAddress = new Uri(Configuration["UrlList:Url02"]);
+			//	client.Timeout = new TimeSpan(0, 0, 30);
+			//	client.DefaultRequestHeaders.Clear();
+			//})
+			//.ConfigurePrimaryHttpMessageHandler(handler =>
+			// new HttpClientHandler()
+			// {
+			//	 AutomaticDecompression = System.Net.DecompressionMethods.GZip
+			// });
+
+			serviceCollection.AddHttpClient<MoviesClient>()
+			.ConfigurePrimaryHttpMessageHandler(handler =>
+			 new HttpClientHandler()
+			 {
+				 AutomaticDecompression = System.Net.DecompressionMethods.GZip
+			 });
+
 			//ConfigureServices(serviceCollection, Configuration);
 			serviceCollection.AddSingleton(provider => Configuration);
 
@@ -72,10 +104,10 @@ namespace Movies.Client
 			//serviceCollection.AddScoped<IIntegrationService, StreamService>();
 
 			// For the cancellation demos
-			serviceCollection.AddScoped<IIntegrationService, CancellationService>();
+			//serviceCollection.AddScoped<IIntegrationService, CancellationService>();
 
 			// For the HttpClientFactory demos
-			// serviceCollection.AddScoped<IIntegrationService, HttpClientFactoryInstanceManagementService>();
+			serviceCollection.AddScoped<IIntegrationService, HttpClientFactoryInstanceManagementService>();
 
 			// For the dealing with errors and faults demos
 			// serviceCollection.AddScoped<IIntegrationService, DealingWithErrorsAndFaultsService>();

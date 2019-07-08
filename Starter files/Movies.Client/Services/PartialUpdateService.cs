@@ -14,7 +14,7 @@ namespace Movies.Client.Services
     public class PartialUpdateService : IIntegrationService
     {
 		private static HttpClient _httpClient = new HttpClient();
-		public IConfiguration Configuration { get; }
+		private IConfiguration Configuration { get; }
 
 		public PartialUpdateService(IConfiguration configuration)
 		{
