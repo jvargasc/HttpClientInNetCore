@@ -75,6 +75,9 @@ namespace Movies.Client
 				client.Timeout = new TimeSpan(0, 0, 30);
 				client.DefaultRequestHeaders.Clear();
 			})
+			//.AddHttpMessageHandler(handler => new RetryPolicyDelegatingHandler(2))
+			.AddHttpMessageHandler(handler => new TimeOutDelegatingHandler(TimeSpan.FromSeconds(20)))
+			.AddHttpMessageHandler(handler => new RetryPolicyDelegatingHandler(2))
 			.ConfigurePrimaryHttpMessageHandler(handler =>
 			 new HttpClientHandler()
 			 {
@@ -110,10 +113,10 @@ namespace Movies.Client
 			// serviceCollection.AddScoped<IIntegrationService, HttpClientFactoryInstanceManagementService>();
 
 			// For the dealing with errors and faults demos
-			serviceCollection.AddScoped<IIntegrationService, DealingWithErrorsAndFaultsService>();
+			//serviceCollection.AddScoped<IIntegrationService, DealingWithErrorsAndFaultsService>();
 
 			// For the custom http handlers demos
-			// serviceCollection.AddScoped<IIntegrationService, HttpHandlersService>();     
+			serviceCollection.AddScoped<IIntegrationService, HttpHandlersService>();
 		}
 	}
 }
