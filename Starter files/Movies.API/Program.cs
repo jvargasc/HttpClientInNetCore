@@ -37,9 +37,9 @@ namespace Movies.API
                     logger.LogError(ex, "An error occurred while migrating the database.");
                 }
             }
-
-            // run the web app
-            host.Run();
+			//System.Threading.Thread.Sleep(5000); this is only to force a time out error
+			// run the web app
+			host.Run();
         }
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>

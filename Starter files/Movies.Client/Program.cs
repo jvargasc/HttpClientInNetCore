@@ -1,21 +1,28 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Movies.Client.Services;
 using System;
+using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Movies.Client
 {
-    class Program
+	class Program
     {
- 
-        static async Task Main(string[] args)
+		[STAThread]
+		static async Task Main(string[] args)
         {
             // create a new ServiceCollection 
             var serviceCollection = new ServiceCollection();
 
-            ConfigureServices(serviceCollection);
+			IConfiguration Configuration = new ConfigurationBuilder()
+				.SetBasePath(Directory.GetCurrentDirectory())
+				.AddJsonFile("appsettings.json", true, true)
+				.Build();
+
+			ConfigureServices(serviceCollection, Configuration);
 
             // create a new ServiceProvider
             var serviceProvider = serviceCollection.BuildServiceProvider();
@@ -41,38 +48,75 @@ namespace Movies.Client
             Console.ReadKey();
         }
 
-        private static void ConfigureServices(IServiceCollection serviceCollection)
+        private static void ConfigureServices(IServiceCollection serviceCollection, IConfiguration Configuration)
         {
-            // add loggers           
-            serviceCollection.AddSingleton(new LoggerFactory()
+			// add loggers           
+			serviceCollection.AddSingleton(new LoggerFactory()
                   .AddConsole()
                   .AddDebug());
 
             serviceCollection.AddLogging();
 
-            // register the integration service on our container with a 
-            // scoped lifetime
+			//serviceCollection.AddHttpClient("MoviesClient", client =>
+			//{
+			//	client.BaseAddress = new Uri(Configuration["UrlList:Url02"]);
+			//	client.Timeout = new TimeSpan(0, 0, 30);
+			//	client.DefaultRequestHeaders.Clear();
+			//})
+			//.ConfigurePrimaryHttpMessageHandler(handler => 
+			//	new HttpClientHandler()
+			//{
+			//	AutomaticDecompression = System.Net.DecompressionMethods.GZip
+			//});
 
-            // For the CRUD demos
-            serviceCollection.AddScoped<IIntegrationService, CRUDService>();
+			serviceCollection.AddHttpClient<MoviesClient>(client =>
+			{
+				client.BaseAddress = new Uri(Configuration["UrlList:Url02"]);
+				client.Timeout = new TimeSpan(0, 0, 30);
+				client.DefaultRequestHeaders.Clear();
+			})
+			//.AddHttpMessageHandler(handler => new RetryPolicyDelegatingHandler(2))
+			.AddHttpMessageHandler(handler => new TimeOutDelegatingHandler(TimeSpan.FromSeconds(20)))
+			.AddHttpMessageHandler(handler => new RetryPolicyDelegatingHandler(2))
+			.ConfigurePrimaryHttpMessageHandler(handler =>
+			 new HttpClientHandler()
+			 {
+				 AutomaticDecompression = System.Net.DecompressionMethods.GZip
+			 });
 
-            // For the partial update demos
-            // serviceCollection.AddScoped<IIntegrationService, PartialUpdateService>();
+			//serviceCollection.AddHttpClient<MoviesClient>()
+			//.ConfigurePrimaryHttpMessageHandler(handler =>
+			// new HttpClientHandler()
+			// {
+			//	 AutomaticDecompression = System.Net.DecompressionMethods.GZip
+			// });
 
-            // For the stream demos
-            // serviceCollection.AddScoped<IIntegrationService, StreamService>();
+			//ConfigureServices(serviceCollection, Configuration);
+			serviceCollection.AddSingleton(provider => Configuration);
 
-            // For the cancellation demos
-            // serviceCollection.AddScoped<IIntegrationService, CancellationService>();
+			// register the integration service on our container with a 
+			// scoped lifetime
 
-            // For the HttpClientFactory demos
-            // serviceCollection.AddScoped<IIntegrationService, HttpClientFactoryInstanceManagementService>();
+			// For the CRUD demos
+			//serviceCollection.AddScoped<IIntegrationService, CRUDService>();
 
-            // For the dealing with errors and faults demos
-            // serviceCollection.AddScoped<IIntegrationService, DealingWithErrorsAndFaultsService>();
+			// For the partial update demos
+			//serviceCollection.AddScoped<IIntegrationService, PartialUpdateService>();
 
-            // For the custom http handlers demos
-            // serviceCollection.AddScoped<IIntegrationService, HttpHandlersService>();     
-        }
-    }
+			// For the stream demos
+			//serviceCollection.AddScoped<IIntegrationService, StreamService>();
+
+			// For the cancellation demos
+			//serviceCollection.AddScoped<IIntegrationService, CancellationService>();
+
+			// For the HttpClientFactory demos
+			// serviceCollection.AddScoped<IIntegrationService, HttpClientFactoryInstanceManagementService>();
+
+			// For the dealing with errors and faults demos
+			//serviceCollection.AddScoped<IIntegrationService, DealingWithErrorsAndFaultsService>();
+
+			// For the custom http handlers demos
+			serviceCollection.AddScoped<IIntegrationService, HttpHandlersService>();
+		}
+	}
 }
